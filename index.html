@@ -1,337 +1,354 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Platform Price Calculator — Amazon & MyDukaan</title>
-  <style>
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1.4;background:#f6f8fb;color:#111;margin:0;padding:18px}
-    .container{max-width:940px;margin:18px auto;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(12,30,60,0.06);padding:18px}
-    h1{margin:0 0 6px;font-size:20px}
-    p.lead{margin:0 0 14px;color:#444}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    label{display:block;font-size:13px;color:#333;margin-bottom:6px}
-    input[type="number"], select{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px}
-    .full{grid-column:1/-1}
-    .btns{display:flex;gap:8px;margin-top:12px}
-    button{padding:10px 12px;border-radius:8px;border:0;background:#0b63d5;color:#fff;cursor:pointer;font-weight:600}
-    button.secondary{background:#e6eefc;color:#0b63d5}
-    .result{margin-top:18px;background:#fbfdff;border:1px solid #e6eefc;padding:14px;border-radius:8px}
-    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #e9f0fb}
-    .row:last-child{border-bottom:0}
-    .muted{color:#666;font-size:13px}
-    .small{font-size:13px;color:#444}
-    .note{font-size:13px;color:#555;margin-top:8px}
-    .platform-note{font-size:13px;color:#0b63d5;margin-top:6px}
-    @media(max-width:760px){.grid{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Platform Fee Calculator — Amazon & MyDukaan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#eef2f7; --bg2:#f7fbff; --card:#ffffff; --accent:#0b63d5; --muted:#6b7280;
+    --glass: rgba(255,255,255,0.65);
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  body{
+    margin:0;min-height:100vh;background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    display:flex;align-items:center;justify-content:center;padding:22px;
+  }
+  .wrap{width:100%;max-width:980px}
+  .grid{
+    display:grid;grid-template-columns:1fr 420px;gap:18px;
+  }
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(250,250,252,0.75));
+    border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(12,30,60,0.08);
+    border:1px solid rgba(13,40,85,0.04);
+  }
+  .panel-compact{padding:14px}
+  h1{margin:0;font-size:20px}
+  p.lead{margin:8px 0 18px;color:var(--muted);font-size:14px}
+  label{display:block;font-size:13px;color:#324050;margin-bottom:6px}
+  input[type="number"], select{
+    width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;font-size:14px;background:white;
+  }
+  .row{display:flex;gap:12px}
+  .col{flex:1}
+  .sm{font-size:13px;color:var(--muted)}
+  .btns{display:flex;gap:8px;margin-top:12px}
+  button{padding:10px 12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+  button.ghost{background:white;border:1px solid #dbeafe;color:var(--accent)}
+  .result-card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.95));
+    border-radius:12px;padding:14px;border:1px solid rgba(11,99,213,0.06);
+  }
+  .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #eef4ff}
+  .line:last-child{border-bottom:0}
+  .big{font-weight:700;color:#0f172a}
+  .muted{color:var(--muted);font-size:13px}
+  .platform-tag{font-weight:700;color:var(--accent);font-size:13px}
+  .note{font-size:13px;color:#374151;margin-top:10px}
+  @media(max-width:920px){
+    .grid{grid-template-columns:1fr;align-items:start}
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Platform Price Calculator</h1>
-    <p class="lead">Choose platform (Amazon or MyDukaan). डालें जो amount आपको चाहिए (seller के पास कट्स के बाद) और यह बताएगा customer को दिखने वाला <strong>SP</strong> (GST included) और पूरा breakup.</p>
+<div class="wrap">
+  <div class="grid">
+    <!-- left: inputs -->
+    <div class="card panel-compact">
+      <h1>Platform Price Calculator</h1>
+      <p class="lead">Choose platform, enter desired settlement (or SP) and get full GST & fees breakup. Defaults editable.</p>
 
-    <div class="grid">
-      <div>
-        <label>Platform</label>
-        <select id="platform">
-          <option value="amazon" selected>Amazon (commission + GST, courier etc.)</option>
-          <option value="mydukaan">MyDukaan (3.99% website + 2.50% PG + GST on fees)</option>
-        </select>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <label>Platform</label>
+          <select id="platform">
+            <option value="amazon">Amazon</option>
+            <option value="mydukaan">MyDukaan</option>
+          </select>
+        </div>
+        <div style="width:120px">
+          <label>Round to (₹)</label>
+          <select id="rounding">
+            <option value="0">0.01</option>
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label>Desired settlement to seller (₹)</label>
-        <input id="desired" type="number" step="0.01" min="0" value="6699" />
+      <div class="row" style="margin-bottom:10px">
+        <div class="col">
+          <label>Desired settlement to seller (₹)</label>
+          <input id="desired" type="number" step="0.01" value="6699">
+        </div>
+        <div class="col">
+          <label>OR: Selling Price (SP) shown to customer (₹)</label>
+          <input id="sp_input" type="number" step="0.01" placeholder="(use Reverse calc)">
+        </div>
       </div>
 
-      <div>
-        <label>GST rate (%)</label>
-        <input id="gstRate" type="number" step="0.01" min="0" value="18" />
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div>
+          <label>GST rate (%)</label>
+          <input id="gstRate" type="number" value="18" />
+        </div>
+        <div>
+          <label>Commission rate (%)</label>
+          <input id="commRate" type="number" value="15" />
+        </div>
       </div>
 
-      <div>
-        <label>Commission rate (%)</label>
-        <input id="commRate" type="number" step="0.01" min="0" value="15" />
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px">
+        <div>
+          <label>Payment Gateway (%)</label>
+          <input id="pgRate" type="number" value="0" />
+        </div>
+        <div>
+          <label>Courier / Shipping (fixed ₹)</label>
+          <input id="courier" type="number" value="150" />
+        </div>
       </div>
 
-      <div>
-        <label>Payment gateway rate (%) — (only for MyDukaan)</label>
-        <input id="pgRate" type="number" step="0.01" min="0" value="2.50" />
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px">
+        <div>
+          <label>Fulfilment (fixed ₹)</label>
+          <input id="fulfilment" type="number" value="125.08" />
+        </div>
+        <div>
+          <label>Storage (fixed ₹)</label>
+          <input id="storage" type="number" value="4.14" />
+        </div>
       </div>
 
-      <div>
-        <label>Courier / Shipping fee (fixed ₹)</label>
-        <input id="courier" type="number" step="0.01" min="0" value="150" />
-      </div>
-
-      <div>
-        <label>Fulfilment fee (fixed ₹)</label>
-        <input id="fulfilment" type="number" step="0.01" min="0" value="125.08" />
-      </div>
-
-      <div>
-        <label>Storage cost (fixed ₹)</label>
-        <input id="storage" type="number" step="0.01" min="0" value="4.14" />
-      </div>
-
-      <div class="full">
+      <div style="margin-top:8px">
         <label>Other fixed costs (₹)</label>
-        <input id="other" type="number" step="0.01" min="0" value="0" />
+        <input id="other" type="number" value="0" />
       </div>
 
-      <div class="full">
-        <label>Optional: Round SP to nearest (₹)</label>
-        <select id="rounding">
-          <option value="0">No rounding (show cents)</option>
-          <option value="1">Nearest ₹1</option>
-          <option value="5">Nearest ₹5</option>
-          <option value="10" selected>Nearest ₹10</option>
-          <option value="50">Nearest ₹50</option>
-          <option value="100">Nearest ₹100</option>
-        </select>
+      <div class="btns">
+        <button id="calcBtn">Calculate (Desired → SP)</button>
+        <button class="ghost" id="calcFromSP">Calc from SP</button>
+        <button class="ghost" id="resetBtn">Reset</button>
       </div>
+
+      <p class="note" id="platformNote"></p>
     </div>
 
-    <div class="btns">
-      <button id="calcBtn">Calculate SP</button>
-      <button id="swapBtn" class="secondary">Calculate settlement from SP</button>
-      <button id="resetBtn" class="secondary">Reset defaults</button>
-    </div>
-
-    <div id="platformNote" class="platform-note">Platform: Amazon — Commission 15% + GST on commission, courier fixed ₹150, fulfilment ₹125.08</div>
-
-    <div id="result" class="result" aria-live="polite" hidden>
-      <div class="row"><div class="small muted">Selling Price (SP) — shown to customer (incl. GST)</div><div id="sp" class="small"></div></div>
-      <div class="row"><div class="small muted">Base price (SP ÷ (1 + GST)) — taxable value</div><div id="base" class="small"></div></div>
-      <div class="row"><div class="small muted">GST on SP</div><div id="gstAmount" class="small"></div></div>
-
-      <hr style="border:none;height:8px;background:transparent"/>
-
-      <div id="amazonFeesBlock">
-        <div class="row"><div class="small muted">Commission (<span id="commPercentText"></span>)</div><div id="commission" class="small"></div></div>
-        <div class="row"><div class="small muted">GST on Commission (<span id="gstOnCommText"></span>)</div><div id="gstCommission" class="small"></div></div>
+    <!-- right: results -->
+    <div class="card result-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="platform-tag" id="platformLabel">Platform: Amazon</div>
+          <div class="muted" id="subLabel">Full GST & fee breakup shown below</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted">Net Margin</div>
+          <div id="netMargin" class="big">—</div>
+        </div>
       </div>
 
-      <div id="mydukaanFeesBlock">
-        <div class="row"><div class="small muted">Website commission (<span id="commPercentText2"></span>)</div><div id="commission2" class="small"></div></div>
-        <div class="row"><div class="small muted">Payment gateway fee (<span id="pgPercentText"></span>)</div><div id="pgfee" class="small"></div></div>
-        <div class="row"><div class="small muted">GST on fees (<span id="gstOnFeesText"></span>)</div><div id="gstFees" class="small"></div></div>
+      <div style="height:12px"></div>
+
+      <div id="breakdown">
+        <div class="line"><div class="muted">Selling Price (SP) — shown to customer</div><div id="spOut" class="big">—</div></div>
+        <div class="line"><div class="muted">Base price (SP ÷ (1 + GST))</div><div id="baseOut">—</div></div>
+        <div class="line"><div class="muted">GST on SP</div><div id="gstOut">—</div></div>
+
+        <div id="amazonFees" style="margin-top:8px">
+          <div class="line"><div class="muted">Commission (<span id="commPct">15%</span>)</div><div id="commOut">—</div></div>
+          <div class="line"><div class="muted">GST on Commission</div><div id="gstCommOut">—</div></div>
+        </div>
+
+        <div id="mydukaanFees" style="margin-top:8px;display:none">
+          <div class="line"><div class="muted">Website commission (<span id="commPct2">3.99%</span>)</div><div id="comm2Out">—</div></div>
+          <div class="line"><div class="muted">Payment-gateway (<span id="pgPct">2.50%</span>)</div><div id="pgOut">—</div></div>
+          <div class="line"><div class="muted">GST on fees</div><div id="gstFeesOut">—</div></div>
+        </div>
+
+        <div style="margin-top:8px">
+          <div class="line"><div class="muted">Courier (fixed)</div><div id="courierOut">—</div></div>
+          <div class="line"><div class="muted">Fulfilment (fixed)</div><div id="fulfilmentOut">—</div></div>
+          <div class="line"><div class="muted">Storage (fixed)</div><div id="storageOut">—</div></div>
+          <div class="line"><div class="muted">Other fixed costs</div><div id="otherOut">—</div></div>
+        </div>
+
+        <div style="height:8px"></div>
+        <div class="line"><div class="big">Total deductions</div><div id="totalOut" class="big">—</div></div>
+        <div style="height:6px"></div>
+        <div class="line" style="background:linear-gradient(90deg,#f0fbf6,#fff);border-radius:8px;padding:10px">
+          <div class="big">Settlement to seller</div><div id="settlementOut" class="big">—</div>
+        </div>
+
+        <p class="note" id="noteText"></p>
       </div>
-
-      <div class="row"><div class="small muted">Courier (fixed)</div><div id="courierOut" class="small"></div></div>
-      <div class="row"><div class="small muted">Fulfilment (fixed)</div><div id="fulfilmentOut" class="small"></div></div>
-      <div class="row"><div class="small muted">Storage (fixed)</div><div id="storageOut" class="small"></div></div>
-      <div class="row"><div class="small muted">Other fixed costs</div><div id="otherOut" class="small"></div></div>
-
-      <div style="height:8px"></div>
-      <div class="row" style="font-weight:700;"><div class="small">Total deductions</div><div id="totalDed" class="small"></div></div>
-      <div class="row" style="font-weight:800;background:#f0fbf6;border-radius:6px;margin-top:8px"><div class="small">Settlement to seller (calculated)</div><div id="settlementOut" class="small"></div></div>
-
-      <div class="note" id="noteText"></div>
     </div>
   </div>
+</div>
 
-  <script>
-    // helpers
-    function toNum(v){ return Number((v||0)); }
-    function roundTo(x, step){
-      if(!step || step <= 0) return Math.round((x + Number.EPSILON) * 100)/100;
-      return Math.round(x / step) * step;
-    }
-    function money(x){ return '₹' + Number(x).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+<script>
+/* Utility & formatting */
+function toNum(v){return Number(v)||0;}
+function money(v){ return '₹' + Number(v).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function roundToStep(val, step){
+  if(!step || step<=0) return Math.round((val+Number.EPSILON)*100)/100;
+  return Math.round(val/step)*step;
+}
 
-    function setPlatformDefaults(platform){
-      if(platform === 'amazon'){
-        document.getElementById('commRate').value = 15;
-        document.getElementById('pgRate').value = 0;
-        document.getElementById('courier').value = 150;
-        document.getElementById('fulfilment').value = 125.08;
-        document.getElementById('storage').value = 4.14;
-        document.getElementById('other').value = 0;
-        document.getElementById('platformNote').textContent = 'Platform: Amazon — Commission 15% + GST on commission, courier fixed ₹150, fulfilment ₹125.08';
-      } else if(platform === 'mydukaan'){
-        document.getElementById('commRate').value = 3.99;
-        document.getElementById('pgRate').value = 2.50;
-        document.getElementById('courier').value = 0;           // often merchant bears shipping or included — default 0 (editable)
-        document.getElementById('fulfilment').value = 0;
-        document.getElementById('storage').value = 0;
-        document.getElementById('other').value = 0;
-        document.getElementById('platformNote').textContent = 'Platform: MyDukaan — Website commission 3.99% + Payment gateway 2.50% + GST on these fees.';
-      }
-    }
+/* Elements */
+const platformEl = document.getElementById('platform');
+const platformNote = document.getElementById('platformNote');
+const platformLabel = document.getElementById('platformLabel');
+const commRateEl = document.getElementById('commRate');
+const pgRateEl = document.getElementById('pgRate');
+const roundingEl = document.getElementById('rounding');
 
-    function calculateFromDesired(){
-      const platform = document.getElementById('platform').value;
-      const desired = toNum(document.getElementById('desired').value);
-      const gstRate = toNum(document.getElementById('gstRate').value)/100;
-      const commRate = toNum(document.getElementById('commRate').value)/100;
-      const pgRate = toNum(document.getElementById('pgRate').value)/100;
-      const courier = toNum(document.getElementById('courier').value);
-      const fulfilment = toNum(document.getElementById('fulfilment').value);
-      const storage = toNum(document.getElementById('storage').value);
-      const other = toNum(document.getElementById('other').value);
-      const roundingStep = toNum(document.getElementById('rounding').value);
+function setDefaults(platform){
+  if(platform === 'amazon'){
+    document.getElementById('commRate').value = 15;
+    document.getElementById('pgRate').value = 0;
+    document.getElementById('courier').value = 150;
+    document.getElementById('fulfilment').value = 125.08;
+    document.getElementById('storage').value = 4.14;
+    platformNote.textContent = 'Amazon: commission (on SP) + GST on commission; courier & fulfilment shown as fixed fees.';
+  } else {
+    document.getElementById('commRate').value = 3.99;
+    document.getElementById('pgRate').value = 2.50;
+    document.getElementById('courier').value = 0;
+    document.getElementById('fulfilment').value = 0;
+    document.getElementById('storage').value = 0;
+    platformNote.textContent = 'MyDukaan: website commission + payment gateway; GST applies on combined fees.';
+  }
+  platformLabel.textContent = 'Platform: ' + (platform === 'amazon' ? 'Amazon' : 'MyDukaan');
+}
 
-      const fixedFees = courier + fulfilment + storage + other;
+/* Calculation logic:
+ - For Amazon: commission% applies on SP; GST applied on commission (separately). Denom = 1 - commission*(1+gst)
+ - For MyDukaan: website + PG both apply to SP; GST on their sum. Denom = 1 - (comm+pg)*(1+gst)
+ - Fixed fees (courier, fulfilment, storage, other) are subtracted as absolute rupees.
+ - Formula: SP = (Desired + fixedFees) / denom
+*/
+function calculateFromDesired(){
+  const platform = platformEl.value;
+  const desired = toNum(document.getElementById('desired').value);
+  const gstRate = toNum(document.getElementById('gstRate').value)/100;
+  const commRate = toNum(document.getElementById('commRate').value)/100;
+  const pgRate = toNum(document.getElementById('pgRate').value)/100;
+  const courier = toNum(document.getElementById('courier').value);
+  const fulfil = toNum(document.getElementById('fulfilment').value);
+  const storage = toNum(document.getElementById('storage').value);
+  const other = toNum(document.getElementById('other').value);
+  const rounding = toNum(roundingEl.value);
 
-      let denom;
-      if(platform === 'amazon'){
-        // commission + GST on commission scales with SP: commission * (1 + gst)
-        denom = 1 - commRate * (1 + gstRate);
-      } else {
-        // mydukaan: (commission + pg) + GST on both => (comm + pg) * (1 + gst)
-        denom = 1 - (commRate + pgRate) * (1 + gstRate);
-      }
+  const fixedFees = courier + fulfil + storage + other;
+  let denom;
+  if(platform === 'amazon'){
+    denom = 1 - commRate * (1 + gstRate);
+  } else {
+    denom = 1 - (commRate + pgRate) * (1 + gstRate);
+  }
+  if(denom <= 0){
+    alert('Rates produce invalid denominator. Check commission/pg/GST values.');
+    return;
+  }
+  let spRaw = (desired + fixedFees) / denom;
+  let sp = roundToStep(spRaw, rounding === 0 ? 0 : rounding);
+  // breakdown using sp
+  showBreakdown(sp, gstRate, commRate, pgRate, courier, fulfil, storage, other, platform);
+}
 
-      if(denom <= 0){
-        alert('Parameters lead to non-positive denominator. Check rates.');
-        return;
-      }
+function calculateFromSP(){
+  const platform = platformEl.value;
+  const spVal = toNum(document.getElementById('sp_input').value);
+  const spPrompt = spVal > 0 ? spVal : toNum(prompt('Enter SP shown to customer (₹):','8999'));
+  if(!spPrompt || spPrompt <= 0) return;
+  const gstRate = toNum(document.getElementById('gstRate').value)/100;
+  const commRate = toNum(document.getElementById('commRate').value)/100;
+  const pgRate = toNum(document.getElementById('pgRate').value)/100;
+  const courier = toNum(document.getElementById('courier').value);
+  const fulfil = toNum(document.getElementById('fulfilment').value);
+  const storage = toNum(document.getElementById('storage').value);
+  const other = toNum(document.getElementById('other').value);
+  showBreakdown(spPrompt, gstRate, commRate, pgRate, courier, fulfil, storage, other, platform);
+}
 
-      const spRaw = (desired + fixedFees) / denom;
-      const sp = roundTo(spRaw, roundingStep);
+function showBreakdown(sp, gstRate, commRate, pgRate, courier, fulfil, storage, other, platform){
+  // base/gst on SP
+  const base = sp / (1 + gstRate);
+  const gstOnSp = sp - base;
 
-      // breakdown
-      const basePrice = sp / (1 + gstRate);
-      const gstOnSp = sp - basePrice;
+  // fees
+  const commission = sp * commRate;
+  const pgFee = sp * pgRate;
+  let gstOnCommission = 0, gstOnFees = 0;
 
-      const commission = sp * commRate;
-      const pgfee = sp * pgRate;
-      let gstOnCommission = 0, gstOnFees = 0, totalDeductions = 0;
+  let totalDeductions = 0;
+  if(platform === 'amazon'){
+    gstOnCommission = commission * gstRate;
+    totalDeductions = commission + gstOnCommission + courier + fulfil + storage + other;
+    document.getElementById('amazonFees').style.display = 'block';
+    document.getElementById('mydukaanFees').style.display = 'none';
+    document.getElementById('commPct').textContent = (commRate*100).toFixed(2)+'%';
+  } else {
+    const sumFees = commission + pgFee;
+    gstOnFees = sumFees * gstRate;
+    totalDeductions = commission + pgFee + gstOnFees + courier + fulfil + storage + other;
+    document.getElementById('amazonFees').style.display = 'none';
+    document.getElementById('mydukaanFees').style.display = 'block';
+    document.getElementById('commPct2').textContent = (commRate*100).toFixed(2)+'%';
+    document.getElementById('pgPct').textContent = (pgRate*100).toFixed(2)+'%';
+  }
 
-      if(platform === 'amazon'){
-        gstOnCommission = commission * gstRate;
-        totalDeductions = commission + gstOnCommission + courier + fulfilment + storage + other;
-      } else {
-        const sumFees = commission + pgfee;
-        gstOnFees = sumFees * gstRate;
-        totalDeductions = commission + pgfee + gstOnFees + courier + fulfilment + storage + other;
-      }
+  const settlement = sp - totalDeductions;
+  const netMargin = sp > 0 ? (settlement / sp) * 100 : 0;
 
-      const settlement = sp - totalDeductions;
+  // fill UI
+  document.getElementById('spOut').textContent = money(sp);
+  document.getElementById('baseOut').textContent = money(base);
+  document.getElementById('gstOut').textContent = money(gstOnSp);
 
-      // display/hide blocks accordingly
-      document.getElementById('amazonFeesBlock').style.display = (platform === 'amazon') ? 'block' : 'none';
-      document.getElementById('mydukaanFeesBlock').style.display = (platform === 'mydukaan') ? 'block' : 'none';
+  document.getElementById('commOut').textContent = money(commission);
+  document.getElementById('gstCommOut').textContent = money(gstOnCommission);
 
-      // set values
-      document.getElementById('sp').textContent = money(sp);
-      document.getElementById('base').textContent = money(basePrice);
-      document.getElementById('gstAmount').textContent = money(gstOnSp);
+  document.getElementById('comm2Out').textContent = money(commission);
+  document.getElementById('pgOut').textContent = money(pgFee);
+  document.getElementById('gstFeesOut').textContent = money(gstOnFees);
 
-      document.getElementById('commPercentText').textContent = (commRate*100).toFixed(2) + '% of SP';
-      document.getElementById('commission').textContent = money(commission);
-      document.getElementById('gstOnCommText').textContent = (gstRate*100).toFixed(2) + '% of commission';
-      document.getElementById('gstCommission').textContent = money(gstOnCommission);
+  document.getElementById('courierOut').textContent = money(courier);
+  document.getElementById('fulfilmentOut').textContent = money(fulfil);
+  document.getElementById('storageOut').textContent = money(storage);
+  document.getElementById('otherOut').textContent = money(other);
 
-      document.getElementById('commPercentText2').textContent = (commRate*100).toFixed(2) + '% of SP';
-      document.getElementById('commission2').textContent = money(commission);
-      document.getElementById('pgPercentText').textContent = (pgRate*100).toFixed(2) + '% of SP';
-      document.getElementById('pgfee').textContent = money(pgfee);
-      document.getElementById('gstOnFeesText').textContent = (gstRate*100).toFixed(2) + '% on sum of fees';
-      document.getElementById('gstFees').textContent = money(gstOnFees);
+  document.getElementById('totalOut').textContent = money(totalDeductions);
+  document.getElementById('settlementOut').textContent = money(settlement);
+  document.getElementById('netMargin').textContent = netMargin.toFixed(2) + '%';
 
-      document.getElementById('courierOut').textContent = money(courier);
-      document.getElementById('fulfilmentOut').textContent = money(fulfilment);
-      document.getElementById('storageOut').textContent = money(storage);
-      document.getElementById('otherOut').textContent = money(other);
+  document.getElementById('noteText').textContent = platform === 'amazon'
+    ? 'Formula: SP = (Desired + fixed fees) / (1 - Commission% × (1 + GST%)). Commission has GST applied separately.'
+    : 'Formula: SP = (Desired + fixed fees) / (1 - (Commission% + PG%) × (1 + GST%)). Both website commission and PG attract GST.';
+}
 
-      document.getElementById('totalDed').textContent = money(totalDeductions);
-      document.getElementById('settlementOut').textContent = money(settlement);
+/* Events */
+document.getElementById('calcBtn').addEventListener('click', calculateFromDesired);
+document.getElementById('calcFromSP').addEventListener('click', calculateFromSP);
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  platformEl.value = 'amazon';
+  setDefaults('amazon');
+  document.getElementById('desired').value = 6699;
+  document.getElementById('sp_input').value = '';
+  document.getElementById('gstRate').value = 18;
+  document.getElementById('rounding').value = 10;
+  document.getElementById('result')?.hidden;
+});
+platformEl.addEventListener('change', ()=> setDefaults(platformEl.value));
 
-      const note = platform === 'amazon'
-        ? `Using: SP = (Desired + Fixed fees) / (1 - Commission% × (1 + GST%)). Commission has GST applied separately.`
-        : `Using: SP = (Desired + Fixed fees) / (1 - (Commission% + PG%) × (1 + GST%)). Both website commission and payment-gateway charges have GST applied.`;
-
-      document.getElementById('noteText').textContent = note;
-      document.getElementById('result').hidden = false;
-    }
-
-    function calculateFromSP(){
-      const platform = document.getElementById('platform').value;
-      const spInput = prompt('Enter the Selling Price (SP) shown to customer (₹):', '8999');
-      const sp = toNum(spInput);
-      if(isNaN(sp) || sp <= 0) return;
-
-      const gstRate = toNum(document.getElementById('gstRate').value)/100;
-      const commRate = toNum(document.getElementById('commRate').value)/100;
-      const pgRate = toNum(document.getElementById('pgRate').value)/100;
-      const courier = toNum(document.getElementById('courier').value);
-      const fulfilment = toNum(document.getElementById('fulfilment').value);
-      const storage = toNum(document.getElementById('storage').value);
-      const other = toNum(document.getElementById('other').value);
-
-      const basePrice = sp / (1 + gstRate);
-      const gstOnSp = sp - basePrice;
-
-      const commission = sp * commRate;
-      const pgfee = sp * pgRate;
-      let gstOnCommission = 0, gstOnFees = 0;
-
-      if(platform === 'amazon'){
-        gstOnCommission = commission * gstRate;
-      } else {
-        gstOnFees = (commission + pgfee) * gstRate;
-      }
-
-      const totalDeductions = commission + pgfee + gstOnCommission + gstOnFees + courier + fulfilment + storage + other;
-      const settlement = sp - totalDeductions;
-
-      document.getElementById('amazonFeesBlock').style.display = (platform === 'amazon') ? 'block' : 'none';
-      document.getElementById('mydukaanFeesBlock').style.display = (platform === 'mydukaan') ? 'block' : 'none';
-
-      document.getElementById('sp').textContent = money(sp);
-      document.getElementById('base').textContent = money(basePrice);
-      document.getElementById('gstAmount').textContent = money(gstOnSp);
-
-      document.getElementById('commPercentText').textContent = (commRate*100).toFixed(2) + '% of SP';
-      document.getElementById('commission').textContent = money(commission);
-      document.getElementById('gstOnCommText').textContent = (gstRate*100).toFixed(2) + '% of commission';
-      document.getElementById('gstCommission').textContent = money(gstOnCommission);
-
-      document.getElementById('commPercentText2').textContent = (commRate*100).toFixed(2) + '% of SP';
-      document.getElementById('commission2').textContent = money(commission);
-      document.getElementById('pgPercentText').textContent = (pgRate*100).toFixed(2) + '% of SP';
-      document.getElementById('pgfee').textContent = money(pgfee);
-      document.getElementById('gstOnFeesText').textContent = (gstRate*100).toFixed(2) + '% on sum of fees';
-      document.getElementById('gstFees').textContent = money(gstOnFees);
-
-      document.getElementById('courierOut').textContent = money(courier);
-      document.getElementById('fulfilmentOut').textContent = money(fulfilment);
-      document.getElementById('storageOut').textContent = money(storage);
-      document.getElementById('otherOut').textContent = money(other);
-
-      document.getElementById('totalDed').textContent = money(totalDeductions);
-      document.getElementById('settlementOut').textContent = money(settlement);
-
-      document.getElementById('noteText').textContent = 'Calculated from given SP (direct).';
-      document.getElementById('result').hidden = false;
-    }
-
-    // wire events
-    document.getElementById('calcBtn').addEventListener('click', calculateFromDesired);
-    document.getElementById('swapBtn').addEventListener('click', calculateFromSP);
-    document.getElementById('resetBtn').addEventListener('click', function(){
-      document.getElementById('platform').value = 'amazon';
-      setPlatformDefaults('amazon');
-      document.getElementById('desired').value = 6699;
-      document.getElementById('gstRate').value = 18;
-      document.getElementById('rounding').value = 10;
-      document.getElementById('result').hidden = true;
-    });
-
-    document.getElementById('platform').addEventListener('change', function(){
-      setPlatformDefaults(this.value);
-    });
-
-    document.getElementById('desired').addEventListener('keydown', function(e){
-      if(e.key === 'Enter') calculateFromDesired();
-    });
-
-    // initial state
-    setPlatformDefaults('amazon');
-    calculateFromDesired();
-  </script>
+/* Init */
+setDefaults('amazon');
+calculateFromDesired();
+</script>
 </body>
 </html>
