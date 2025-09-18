@@ -1,127 +1,155 @@
 <!doctype html>
-<html>
+
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Simple Platform Settlement</title>
-<style>
-  body{font-family:Arial,Helvetica,sans-serif;background:#f3f6fb;padding:18px}
-  .box{max-width:520px;margin:0 auto;background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 20px rgba(10,20,40,0.08)}
-  h2{margin:0 0 8px;font-size:18px}
-  .switch{display:flex;gap:8px;margin-bottom:12px}
-  button{flex:1;padding:10px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
-  .active{background:#0b63d5;color:#fff} .idle{background:#eef3ff;color:#0b63d5}
-  label{display:block;margin-top:8px;font-size:13px;color:#333}
-  input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;margin-top:6px}
-  .result{margin-top:12px;padding:12px;background:#f8fbff;border-radius:8px;border:1px solid #e6f0ff}
-  .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eef6ff}
-  .row:last-child{border-bottom:0}
-  .muted{color:#556; font-size:13px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Amazon vs MyDukaan — Target Settlement Calculator</title>
+  <style>
+    body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:#f7fafc;color:#0f172a;padding:20px}
+    .card{background:white;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.08);padding:20px;max-width:920px;margin:18px auto}
+    h1{font-size:20px;margin:0 0 12px}
+    label{display:block;font-size:13px;margin:8px 0 4px}
+    input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef6;font-size:15px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    button{background:#0ea5a4;color:white;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;margin-top:12px}
+    .small{font-size:13px;color:#475569}
+    .result{margin-top:14px;padding:14px;border-radius:10px;background:#f1f5f9}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    td,th{padding:8px;border-bottom:1px solid #e6eef6;text-align:left}
+    .muted{color:#64748b}
+  </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Simple Platform Settlement</h2>
+  <div class="card">
+    <h1>Amazon vs MyDukaan — Target Settlement Calculator</h1>
+    <p class="small">Enter the <strong>amount you want to receive</strong> (final settlement after platform charges, courier, and GST). The page computes the required selling price (MRP / customer price, GST inclusive) for both platforms. You can tweak default rates if needed.</p><label>Target settlement (₹)</label>
+<input id="target" type="number" placeholder="e.g. 6699" value="6699" />
 
-    <div class="switch">
-      <button id="btnAmazon" class="active">Amazon</button>
-      <button id="btnDukaan" class="idle">MyDukaan</button>
+<div style="margin-top:12px">
+  <strong>Amazon defaults</strong>
+  <div class="row" style="margin-top:8px">
+    <div class="col">
+      <label>Amazon percentage charges (referral+fulfilment+other) %</label>
+      <input id="amazonRate" type="number" step="0.0001" value="18.03" />
     </div>
-
-    <label>Price on platform (₹) — enter amount shown to customer</label>
-    <input id="price" type="number" step="0.01" value="8999"/>
-
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button id="calc" style="flex:1;background:#06b; color:#fff;border-radius:8px;padding:10px">Calculate</button>
-      <button id="reset" style="flex:1;background:#eef3ff;color:#064; border-radius:8px;padding:10px">Reset</button>
-    </div>
-
-    <div id="out" class="result" aria-live="polite">
-      <div class="row"><div class="muted">Platform</div><div id="plat" class="muted">Amazon</div></div>
-      <div class="row"><div class="muted">Price on platform</div><div id="outPrice" class="muted">—</div></div>
-      <div class="row"><div class="muted">Settlement (with GST)</div><div id="settleWith" class="muted">—</div></div>
-      <div class="row"><div class="muted">Settlement (after removed GST)</div><div id="settleNoGST" class="muted">—</div></div>
-      <div style="height:8px"></div>
-      <div class="muted" id="explain" style="font-size:13px"></div>
+    <div class="col">
+      <label>Amazon courier (fixed ₹)</label>
+      <input id="amazonCourier" type="number" step="0.01" value="150" />
     </div>
   </div>
+</div>
 
-<script>
-  // Defaults
-  const amazon = { commPct:0.15, courier:150, gstPct:0.18 };
-  const mydukaan = { commPct:0.0399, pgPct:0.025, courierIncluded:100, gstPct:0.18 };
+<div style="margin-top:12px">
+  <strong>MyDukaan defaults</strong>
+  <div class="row" style="margin-top:8px">
+    <div class="col">
+      <label>Platform + PG charges % (3.99 + 2.50 = 6.49)</label>
+      <input id="mydukaanRate" type="number" step="0.0001" value="6.49" />
+    </div>
+    <div class="col">
+      <label>MyDukaan courier (fixed ₹)</label>
+      <input id="mydukaanCourier" type="number" step="0.01" value="100" />
+    </div>
+  </div>
+</div>
 
-  let platform = 'amazon';
-  const btnA = document.getElementById('btnAmazon');
-  const btnD = document.getElementById('btnDukaan');
-  const priceEl = document.getElementById('price');
-  const platOut = document.getElementById('plat');
-  const outPrice = document.getElementById('outPrice');
-  const settleWith = document.getElementById('settleWith');
-  const settleNoGST = document.getElementById('settleNoGST');
-  const explain = document.getElementById('explain');
+<div style="margin-top:12px">
+  <label>GST % (standard)</label>
+  <input id="gst" type="number" step="0.01" value="18" />
+</div>
 
-  function setActive(p){
-    platform = p;
-    if(p==='amazon'){ btnA.className='active'; btnD.className='idle'; platOut.textContent='Amazon'; }
-    else { btnA.className='idle'; btnD.className='active'; platOut.textContent='MyDukaan'; }
-  }
-  btnA.onclick = ()=> setActive('amazon');
-  btnD.onclick = ()=> setActive('mydukaan');
+<button id="calc">Calculate required selling prices</button>
 
-  function money(x){ return '₹'+Number(x).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+<div id="out" class="result" aria-live="polite"></div>
 
-  function calc(){
-    const P = Number(priceEl.value) || 0;
-    outPrice.textContent = money(P);
+  </div>  <script>
+    function money(x){ return Number(x).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2}); }
 
-    if(platform === 'amazon'){
-      const gst = amazon.gstPct;
-      // SP includes GST
-      const base = P / (1+gst);
-      const gstOnSP = P - base;
-      const commission = P * amazon.commPct;
-      const gstOnCommission = commission * gst;
-      const totalDeduct = commission + gstOnCommission + amazon.courier;
-      const settlement_with_gst = P - totalDeduct;
-      const settlement_after_removed_gst = settlement_with_gst - gstOnSP;
+    function compute(){
+      const final = parseFloat(document.getElementById('target').value) || 0;
+      const amazonRate = (parseFloat(document.getElementById('amazonRate').value) || 0)/100; // e.g. 0.1803
+      const amazonCourier = parseFloat(document.getElementById('amazonCourier').value) || 0;
+      const myRate = (parseFloat(document.getElementById('mydukaanRate').value) || 0)/100; // e.g. 0.0649
+      const myCourier = parseFloat(document.getElementById('mydukaanCourier').value) || 0;
+      const gst = (parseFloat(document.getElementById('gst').value) || 0)/100;
 
-      settleWith.textContent = money(settlement_with_gst);
-      settleNoGST.textContent = money(settlement_after_removed_gst);
+      // --- Amazon formula ---
+      // Final = ((1 - amazonRate)*P - amazonCourier) * (1 - gst)
+      // => ((1 - amazonRate)*P - amazonCourier) = Final / (1 - gst)
+      // => P = ( Final/(1-gst) + amazonCourier ) / (1 - amazonRate)
+      const denomA = (1 - amazonRate);
+      let priceA = NaN;
+      if(denomA <= 0){ priceA = NaN; }
+      else {
+        priceA = ( final / (1 - gst) + amazonCourier ) / denomA;
+      }
 
-      explain.textContent = `Break: base ₹${money(base)} + GST ₹${money(gstOnSP)}. Commission ₹${money(commission)} + GST on commission ₹${money(gstOnCommission)} + courier ₹${money(amazon.courier)}.`;
-    } else {
-      // MyDukaan
-      const gst = mydukaan.gstPct;
-      const base = P / (1+gst);
-      const gstOnSP = P - base;
-      const commission = P * mydukaan.commPct;
-      const pgfee = P * mydukaan.pgPct;
-      const gstOnFees = (commission + pgfee) * gst;
-      // courier included in price — not separately deducted (you said included)
-      const totalDeduct = commission + pgfee + gstOnFees;
-      const settlement_with_gst = P - totalDeduct;
-      const settlement_after_removed_gst = settlement_with_gst - gstOnSP;
+      // breakdown Amazon
+      const chargesA = priceA * amazonRate;
+      const beforeGstA = priceA - chargesA - amazonCourier;
+      const gstAmtA = beforeGstA * gst;
+      const settlementA = beforeGstA - gstAmtA;
 
-      settleWith.textContent = money(settlement_with_gst);
-      settleNoGST.textContent = money(settlement_after_removed_gst);
+      // --- MyDukaan formula ---
+      // Derived: Final = ( (1 - myRate) * P - courier ) - GST_portion
+      // GST_portion = P - P/(1+gst) = P * (gst/(1+gst))
+      // So Final = (1 - myRate)P - courier - P*gst/(1+gst) = [ (1 - myRate) - gst/(1+gst) ] * P - courier
+      // Let K = (1 - myRate) - gst/(1+gst)  => P = (Final + courier) / K
+      const gstPortionFactor = gst / (1 + gst);
+      const K = (1 - myRate) - gstPortionFactor;
+      let priceM = NaN;
+      if(K <= 0){ priceM = NaN; }
+      else{
+        priceM = ( final + myCourier ) / K;
+      }
 
-      explain.textContent = `Break: base ₹${money(base)} + GST ₹${money(gstOnSP)}. Commission ₹${money(commission)} + PG ₹${money(pgfee)} + GST on fees ₹${money(gstOnFees)}. (Courier ₹${money(mydukaan.courierIncluded)} included in price)`;
+      const chargesM = priceM * myRate;
+      const afterCommissionM = priceM - chargesM;
+      const beforeGstM = afterCommissionM - myCourier;
+      const gstAmtM = priceM - priceM/(1+gst);
+      const settlementM = beforeGstM - gstAmtM;
+
+      // render
+      const out = document.getElementById('out');
+      out.innerHTML = '';
+
+      if(!isFinite(priceA)){
+        out.innerHTML += '<strong>Amazon:</strong> Invalid inputs (check rates).<br/>';
+      } else {
+        out.innerHTML += `<h3>Amazon (Estimate)</h3>
+          <table>
+            <tr><th>Required selling price (MRP, ₹)</th><td>₹ ${money(priceA)}</td></tr>
+            <tr><td class="muted">Amazon % charges on price</td><td>₹ ${money(chargesA)} (${(amazonRate*100).toFixed(2)}%)</td></tr>
+            <tr><td class="muted">Fixed courier</td><td>₹ ${money(amazonCourier)}</td></tr>
+            <tr><td class="muted">Settlement before GST</td><td>₹ ${money(beforeGstA)}</td></tr>
+            <tr><td class="muted">GST on settlement (${(gst*100).toFixed(2)}%)</td><td>₹ ${money(gstAmtA)}</td></tr>
+            <tr><th>Final settlement (should ≈ target)</th><th>₹ ${money(settlementA)}</th></tr>
+          </table>
+        `;
+      }
+
+      if(!isFinite(priceM)){
+        out.innerHTML += '<br/><strong>MyDukaan:</strong> Invalid inputs (check rates).';
+      } else {
+        out.innerHTML += `<h3>MyDukaan (Estimate)</h3>
+          <table>
+            <tr><th>Required selling price (MRP, ₹)</th><td>₹ ${money(priceM)}</td></tr>
+            <tr><td class="muted">Platform + PG charges</td><td>₹ ${money(chargesM)} (${(myRate*100).toFixed(2)}%)</td></tr>
+            <tr><td class="muted">Fixed courier</td><td>₹ ${money(myCourier)}</td></tr>
+            <tr><td class="muted">Settlement before GST</td><td>₹ ${money(beforeGstM)}</td></tr>
+            <tr><td class="muted">GST on price (${(gst*100).toFixed(2)}%)</td><td>₹ ${money(gstAmtM)}</td></tr>
+            <tr><th>Final settlement (should ≈ target)</th><th>₹ ${money(settlementM)}</th></tr>
+          </table>
+        `;
+      }
+
+      out.innerHTML += '<p class="small muted">Notes: These are estimates based on the rates you see above. Adjust percentages or courier as per actual platform invoices for best accuracy.</p>';
     }
-  }
 
-  document.getElementById('calc').addEventListener('click', calc);
-  document.getElementById('reset').addEventListener('click', ()=>{
-    priceEl.value = (platform==='amazon')?8999:1000;
-    outPrice.textContent = '—';
-    settleWith.textContent = '—';
-    settleNoGST.textContent = '—';
-    explain.textContent = '';
-  });
-
-  // initial
-  setActive('amazon');
-  calc();
-</script>
-</body>
+    document.getElementById('calc').addEventListener('click', compute);
+    // run once on load
+    compute();
+  </script></body>
 </html>
